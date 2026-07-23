@@ -1,12 +1,12 @@
 import React from 'react';
-import Game from './components/Game';
+import Minesweeper from './components/Minesweeper';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
       <main>
-        <Game />
+        <Minesweeper />
       </main>
     </div>
   );

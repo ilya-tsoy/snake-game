@@ -3,6 +3,6 @@ import App from './App';
 
 test('renders the game title', () => {
   render(<App />);
-  const titleElement = screen.getByText(/Snake Game/i);
+  const titleElement = screen.getByText(/Minesweeper/i);
   expect(titleElement).toBeInTheDocument();
 });
