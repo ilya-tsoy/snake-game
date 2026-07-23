@@ -4,39 +4,18 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
   background-color: #e9ddff;
   font-family: 'Courier New', monospace;
-}
-
-.game-container {
-  margin: 0 auto;
-  position: relative;
-  border: 4px solid #4b1b6b;
   padding: 20px;
-  background-color: #2f0f48;
+  box-sizing: border-box;
 }
 
-.pause-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #2b0a3d;
-  color: #e9ddff;
-  padding: 20px;
-  font-size: 24px;
-  font-weight: bold;
-  z-index: 10;
-  font-family: 'Courier New', monospace;
-  border: 2px solid #8f4fd6;
-}
-
-.instructions {
-  margin-top: 20px;
-  font-size: 16px;
-  color: #2b0a3d;
-  font-family: 'Courier New', monospace;
+.minesweeper {
+  --cell-size: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h1 {
@@ -45,4 +24,107 @@ h1 {
   font-size: 32px;
   font-family: 'Courier New', monospace;
   text-transform: uppercase;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.controls select {
+  font-family: 'Courier New', monospace;
+  padding: 4px 6px;
+  font-size: 14px;
+}
+
+.mines-left {
+  background-color: #2f0f48;
+  color: #e9ddff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  min-width: 60px;
+}
+
+.reset {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 6px 12px;
+  cursor: pointer;
+  border: 2px solid #4b1b6b;
+  background-color: #8f4fd6;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.reset:hover {
+  background-color: #7b3fc4;
+}
+
+.status-message {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.status-message.won {
+  color: #2e7d32;
+}
+
+.status-message.lost {
+  color: #c62828;
+}
+
+.board {
+  display: grid;
+  gap: 0;
+  border: 4px solid #4b1b6b;
+  background-color: #2f0f48;
+}
+
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  padding: 0;
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #c7b8e0;
+  border: 2px outset #ded3f0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cell:hover:not(:disabled) {
+  background-color: #d6cbe8;
+}
+
+.cell.revealed {
+  background-color: #efe9f7;
+  border: 1px solid #b7a8d0;
+  cursor: default;
+}
+
+.cell.revealed.mine {
+  background-color: #ffb3b3;
+}
+
+.cell:disabled {
+  cursor: default;
+}
+
+.hint {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #2b0a3d;
 }

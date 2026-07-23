@@ -1,25 +1,27 @@
 import React from 'react';
-import Snake from './Snake';
-import Food from './Food';
+import Cell from './Cell';
 
-const Board = ({ snakeBody, snake2Body, foodPosition, gridSize }) => {
-  const style = {
-    width: `${gridSize * 20}px`,
-    height: `${gridSize * 20}px`,
-    position: 'relative',
-    margin: '0 auto',
-    backgroundColor: '#2f0f48',
-    border: '4px solid #4b1b6b',
-    boxShadow: 'inset 0 0 0 2px #8f4fd6'
-  };
+function Board({ board, gameOver, onReveal, onFlag }) {
+  const cols = board[0]?.length ?? 0;
 
   return (
-    <div data-testid="game-board" style={style}>
-      <Snake segments={snakeBody} color="#d3a6ff" />
-      <Snake segments={snake2Body} color="#6a1bb8" />
-      <Food position={foodPosition} />
+    <div
+      className="board"
+      style={{ gridTemplateColumns: `repeat(${cols}, var(--cell-size))` }}
+    >
+      {board.map((row) =>
+        row.map((cell) => (
+          <Cell
+            key={`${cell.row}-${cell.col}`}
+            cell={cell}
+            gameOver={gameOver}
+            onReveal={onReveal}
+            onFlag={onFlag}
+          />
+        ))
+      )}
     </div>
   );
-};
+}
 
 export default Board;

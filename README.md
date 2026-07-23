@@ -1,38 +1,40 @@
-# Snake Game
+# Minesweeper
 
-A classic Snake game built with React where the player controls a snake that grows when eating food.
+A classic Minesweeper game built with React. Reveal every safe cell without detonating a mine.
 
 ## Project Structure
 
-- `src/components/`: Contains all React components for the game:
-  - `Game.js`: The main game component managing game state and logic
-  - `Board.js`: The game board where the snake moves
-  - `Snake.js`: Component for rendering the snake segments
-  - `Food.js`: Component for rendering the food item
-  - `Score.js`: Component for displaying the current score
-  - `GameOver.js`: Component shown when the game ends
-  
-- `src/hooks/`: Custom React hooks:
-  - `useInterval.js`: A custom hook for handling setInterval with React's lifecycle
+- `src/components/`: React components for the game
+  - `Minesweeper.js`: Main component managing game state and logic
+  - `Board.js`: Renders the grid of cells
+  - `Cell.js`: A single cell (reveal / flag / mine / number)
 
-- `src/utils/`: Helper functions:
-  - `gameUtils.js`: Contains utility functions for game logic (collision detection, random food generation)
+- `src/utils/`: Helper functions
+  - `minesweeperUtils.js`: Pure game logic — board creation, mine placement, flood-fill reveal, flagging, and win detection
 
-- `src/tests/`: Contains test files for each component
+- `src/tests/`: Unit tests for the game logic
 
 ## Game Features
 
-- A grid-based game board
-- Snake movement controlled by arrow keys
-- Food that appears randomly on the board
-- Score tracking
-- Game over when snake hits the wall or itself
-- Ability to pause the game with the space bar
-- Game restart option after game over
+- Three difficulty levels: Beginner (9×9, 10 mines), Intermediate (16×16, 40 mines), Expert (16×30, 99 mines)
+- First click is always safe — mines are placed after the first reveal
+- Flood-fill reveal of empty regions
+- Right-click flagging with a remaining-mine counter
+- Win/lose detection and one-click new game
 
 ## How to Play
 
-- Use arrow keys (↑, ↓, ←, →) to control the snake's direction
-- Press the space bar to pause/resume the game
-- Eat the red food to grow the snake and score points
-- Avoid hitting the walls or the snake's own body
+- **Left-click** a cell to reveal it
+- **Right-click** a cell to place or remove a flag
+- Numbers show how many mines touch that cell
+- Reveal all non-mine cells to win; hit a mine and you lose
+- Use the difficulty selector or **New Game** button to restart
+
+## Development
+
+```bash
+npm install   # install dependencies
+npm start     # run the dev server at http://localhost:3000
+npm test      # run the test suite
+npm run build # production build
+```
