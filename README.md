@@ -1,38 +1,65 @@
-# Snake Game
+# Snake
 
-A classic Snake game built with React where the player controls a snake that grows when eating food.
+A classic single-player Snake game built with React.
 
-## Project Structure
+![Snake](https://img.shields.io/badge/React-18-61dafb) ![Tests](https://img.shields.io/badge/tests-46-brightgreen)
 
-- `src/components/`: Contains all React components for the game:
-  - `Game.js`: The main game component managing game state and logic
-  - `Board.js`: The game board where the snake moves
-  - `Snake.js`: Component for rendering the snake segments
-  - `Food.js`: Component for rendering the food item
-  - `Score.js`: Component for displaying the current score
-  - `GameOver.js`: Component shown when the game ends
-  
-- `src/hooks/`: Custom React hooks:
-  - `useInterval.js`: A custom hook for handling setInterval with React's lifecycle
+## Play
 
-- `src/utils/`: Helper functions:
-  - `gameUtils.js`: Contains utility functions for game logic (collision detection, random food generation)
+- **Move** — arrow keys or `W` `A` `S` `D`
+- **Pause / resume** — `Space`
+- **Restart** — `R`, or `Enter` on the game-over card
+- **Touch** — swipe anywhere on the board, or use the on-screen pad
 
-- `src/tests/`: Contains test files for each component
+Eat the food to grow and score. The game ends when the snake leaves the board or
+runs into itself. Fill every cell and you win outright.
 
-## Game Features
+## Design
 
-- A grid-based game board
-- Snake movement controlled by arrow keys
-- Food that appears randomly on the board
-- Score tracking
-- Game over when snake hits the wall or itself
-- Ability to pause the game with the space bar
-- Game restart option after game over
+The game is a pure state machine wrapped in a thin React shell. All the rules
+live in `src/game/engine.js` as a reducer over `tick` / `turn` / `togglePause` /
+`restart` actions — no DOM, no timers, no React. That split is what makes the
+rules straightforward to test and the components purely presentational.
 
-## How to Play
+```
+src/
+  game/
+    constants.js     board size, tick rates, direction vectors
+    engine.js        the rules: createInitialState + the reducer
+    engine.test.js   unit tests for every rule
+  hooks/
+    useGameLoop.js   fixed-step requestAnimationFrame loop
+    useHighScore.js  best score, persisted to localStorage
+    useSwipe.js      touch drags to direction changes
+  components/
+    Board.js         snake and food, positioned over a CSS grid
+    Hud.js           score, best, length, level and speed meter
+    Overlay.js       start / paused / game-over card
+    TouchPad.js      on-screen direction pad
+  App.js             input handling, wiring, layout
+```
 
-- Use arrow keys (↑, ↓, ←, →) to control the snake's direction
-- Press the space bar to pause/resume the game
-- Eat the red food to grow the snake and score points
-- Avoid hitting the walls or the snake's own body
+Three details worth knowing:
+
+- **Turns are queued, not applied instantly.** Applying turns immediately loses
+  the second press of a quick combo such as up-then-left when both land inside
+  one tick. Turns go into a short queue and are consumed one per tick instead,
+  so both register.
+- **The loop is `requestAnimationFrame` with a fixed-step accumulator**, not
+  `setInterval`. Ticks stay aligned to paints, the tick rate can change mid-game
+  without restarting a timer, and a backgrounded tab stops advancing instead of
+  queueing up a burst of moves.
+- **Food placement enumerates free cells** rather than retrying random guesses,
+  so it stays fast and terminating even when the board is nearly full — and
+  returns `null` when there is no free cell, which is how a win is detected.
+
+## Develop
+
+```bash
+npm install
+npm start     # dev server on http://localhost:3000
+npm test      # watch mode
+npm run build # production bundle in build/
+```
+
+See [README_BUILD.md](README_BUILD.md) for build and deployment details.

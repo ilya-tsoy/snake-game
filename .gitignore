@@ -11,6 +11,8 @@
 
 # misc
 .DS_Store
+# macOS AppleDouble resource forks, created when copying to non-HFS volumes
+._*
 .env.local
 .env.development.local
 .env.test.local

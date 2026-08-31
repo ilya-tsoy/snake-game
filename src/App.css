@@ -1,48 +1,329 @@
-.App {
-  text-align: center;
+.app {
   display: flex;
-  flex-direction: column;
+  min-height: 100vh;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background-color: #e9ddff;
-  font-family: 'Courier New', monospace;
+  padding: clamp(12px, 3vw, 32px);
 }
 
-.game-container {
-  margin: 0 auto;
-  position: relative;
-  border: 4px solid #4b1b6b;
-  padding: 20px;
-  background-color: #2f0f48;
+.game {
+  display: flex;
+  width: min(100%, 520px);
+  flex-direction: column;
+  gap: 16px;
 }
 
-.pause-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #2b0a3d;
-  color: #e9ddff;
-  padding: 20px;
-  font-size: 24px;
-  font-weight: bold;
-  z-index: 10;
-  font-family: 'Courier New', monospace;
-  border: 2px solid #8f4fd6;
+/* ---------- header + hud ---------- */
+
+.game__header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.instructions {
-  margin-top: 20px;
-  font-size: 16px;
-  color: #2b0a3d;
-  font-family: 'Courier New', monospace;
+.game__title {
+  margin: 0;
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-h1 {
-  color: #2b0a3d;
-  margin-bottom: 10px;
-  font-size: 32px;
-  font-family: 'Courier New', monospace;
+.hud {
+  display: grid;
+  grid-template-columns: repeat(3, auto) 1fr;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat--speed {
+  justify-self: end;
+  min-width: 84px;
+}
+
+.stat__label {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.stat__value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.speed-meter {
+  display: block;
+  height: 6px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.speed-meter__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 240ms ease-out;
+}
+
+/* ---------- board ---------- */
+
+.game__stage {
+  position: relative;
+  /* Swipe gestures drive the snake, so don't let the browser pan instead. */
+  touch-action: none;
+}
+
+.board {
+  position: relative;
+  /* z-index here gives the board its own stacking context, so the per-segment
+     z-indexes stay contained and cannot paint over the overlay. */
+  z-index: 0;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background-color: var(--board-bg);
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: calc(100% / var(--grid-size)) calc(100% / var(--grid-size));
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
+}
+
+.segment {
+  position: absolute;
+  border-radius: 28%;
+  /* Body tapers and darkens toward the tail. */
+  background: color-mix(
+    in srgb,
+    var(--snake-tail) calc(var(--segment-progress, 0) * 75%),
+    var(--snake)
+  );
+  transform: scale(calc(0.9 - var(--segment-progress, 0) * 0.16));
+}
+
+.segment--head {
+  border-radius: 34%;
+  background: var(--snake-head);
+  box-shadow: 0 0 14px -2px var(--snake);
+  transform: scale(0.96) rotate(var(--head-rotate, 0deg));
+}
+
+.segment--head[data-direction='right'] { --head-rotate: 0deg; }
+.segment--head[data-direction='down'] { --head-rotate: 90deg; }
+.segment--head[data-direction='left'] { --head-rotate: 180deg; }
+.segment--head[data-direction='up'] { --head-rotate: -90deg; }
+
+/* Eyes, drawn as if the head faces right and rotated with it. */
+.segment--head::before,
+.segment--head::after {
+  position: absolute;
+  right: 15%;
+  width: 17%;
+  height: 17%;
+  border-radius: 50%;
+  background: var(--board-bg);
+  content: '';
+}
+
+.segment--head::before { top: 20%; }
+.segment--head::after { bottom: 20%; }
+
+.food {
+  position: absolute;
+}
+
+.food::after {
+  position: absolute;
+  inset: 16%;
+  border-radius: 50%;
+  background: var(--food);
+  box-shadow: 0 0 14px 2px var(--food-glow);
+  content: '';
+  animation: food-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes food-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.78); }
+}
+
+/* ---------- overlay ---------- */
+
+.overlay {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--board-bg) 72%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.overlay__card {
+  display: flex;
+  max-width: 300px;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.overlay__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.overlay__score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.overlay__badge {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--board-bg);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.overlay__body,
+.overlay__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.button {
+  margin-top: 4px;
+  padding: 10px 22px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--board-bg);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.button:hover {
+  filter: brightness(1.08);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* ---------- touch pad ---------- */
+
+.touchpad {
+  display: none;
+  grid-template-areas:
+    '. up .'
+    'left down right';
+  gap: 8px;
+  justify-content: center;
+}
+
+.touchpad__button {
+  width: 100%;
+  min-width: 64px;
+  padding: 14px 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.25rem;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.touchpad__button:active {
+  background: var(--border);
+}
+
+.touchpad__up { grid-area: up; }
+.touchpad__left { grid-area: left; }
+.touchpad__down { grid-area: down; }
+.touchpad__right { grid-area: right; }
+
+/* Only worth the space where there is no keyboard. */
+@media (hover: none), (max-width: 480px) {
+  .touchpad {
+    display: grid;
+  }
+}
+
+/* ---------- footer ---------- */
+
+.game__footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .food::after,
+  .speed-meter__fill,
+  .button {
+    animation: none;
+    transition: none;
+  }
 }
