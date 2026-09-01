@@ -66,6 +66,22 @@ describe('tickDelayFor', () => {
   it('never drops below the floor', () => {
     expect(tickDelayFor(10_000)).toBe(MIN_TICK_MS);
   });
+
+  it('leaves enough reaction time at the hardest level', () => {
+    // The difficulty ceiling has to stay playable: crossing the whole board
+    // should never take less than 1.5s, or high levels become guesswork.
+    const fastestBoardCrossing = tickDelayFor(10_000) * GRID_SIZE;
+    expect(fastestBoardCrossing).toBeGreaterThanOrEqual(1500);
+  });
+
+  it('ramps down over at least ten levels', () => {
+    // A lower ceiling must not come from a shorter ramp -- the speed-up should
+    // still be spread across many levels rather than bottoming out early.
+    const levelsToTopSpeed = Math.ceil(
+      (BASE_TICK_MS - MIN_TICK_MS) / SPEED_UP_STEP_MS,
+    );
+    expect(levelsToTopSpeed).toBeGreaterThanOrEqual(10);
+  });
 });
 
 describe('placeFood', () => {
