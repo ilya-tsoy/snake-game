@@ -1,25 +1,47 @@
 import React from 'react';
-import Snake from './Snake';
-import Food from './Food';
 
-const Board = ({ snakeBody, snake2Body, foodPosition, gridSize }) => {
-  const style = {
-    width: `${gridSize * 20}px`,
-    height: `${gridSize * 20}px`,
-    position: 'relative',
-    margin: '0 auto',
-    backgroundColor: '#2f0f48',
-    border: '4px solid #4b1b6b',
-    boxShadow: 'inset 0 0 0 2px #8f4fd6'
-  };
+/**
+ * Draws the snake and the food as absolutely positioned cells over a CSS grid
+ * background. Everything is sized in percentages, so the board scales to
+ * whatever space the layout gives it without any resize maths in JS.
+ */
+export default function Board({ snake, food, gridSize, direction }) {
+  const cellSize = 100 / gridSize;
+
+  const cellStyle = ({ x, y }) => ({
+    left: `${x * cellSize}%`,
+    top: `${y * cellSize}%`,
+    width: `${cellSize}%`,
+    height: `${cellSize}%`,
+  });
 
   return (
-    <div data-testid="game-board" style={style}>
-      <Snake segments={snakeBody} color="#d3a6ff" />
-      <Snake segments={snake2Body} color="#6a1bb8" />
-      <Food position={foodPosition} />
+    <div
+      className="board"
+      data-testid="board"
+      style={{ '--grid-size': gridSize }}
+      role="img"
+      aria-label={`Snake board, ${gridSize} by ${gridSize} cells. Snake is ${snake.length} segments long.`}
+    >
+      {food && <div className="food" data-testid="food" style={cellStyle(food)} />}
+
+      {snake.map((segment, index) => (
+        // Coordinates are unique across the snake (an overlap ends the game),
+        // so keying by them lets React reuse nodes as the snake slides along:
+        // only the new head and the dropped tail actually change.
+        <div
+          key={`${segment.x},${segment.y}`}
+          className={index === 0 ? 'segment segment--head' : 'segment'}
+          data-testid={index === 0 ? 'snake-head' : 'snake-segment'}
+          data-direction={index === 0 ? direction : undefined}
+          style={{
+            ...cellStyle(segment),
+            zIndex: snake.length - index,
+            // Lets CSS fade and taper the body from head to tail.
+            '--segment-progress': index / Math.max(1, snake.length - 1),
+          }}
+        />
+      ))}
     </div>
   );
-};
-
-export default Board;
+}
